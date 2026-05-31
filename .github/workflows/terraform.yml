@@ -11,6 +11,11 @@ permissions:
   contents: read
   pull-requests: write # Required for posting PR comments
 
+# Prevent multiple concurrent runs on the same branch/PR (avoids state locks)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   terraform-ci:
     name: 'Terraform Quality & Security'
@@ -39,7 +44,7 @@ jobs:
     - name: Run TFLint
       run: |
         tflint --init
-        tflint -f compact
+        tflint --recursive -f compact
 
     # 2. tfsec - Static analysis for security vulnerabilities
     - name: Run tfsec
@@ -54,38 +59,52 @@ jobs:
         directory: .
         framework: terraform
         quiet: true
-        soft_fail: false # Set to true if you don't want to block the pipeline
+        soft_fail: false # Set to false to block insecure changes
 
     # 4. Terraform Format & Init
     - name: Terraform Format
       run: terraform fmt -check -recursive
 
     - name: Terraform Init
+      id: init
       run: terraform init
+      working-directory: environments/dev
+
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
       working-directory: environments/dev
 
     # 5. Terraform Plan
     - name: Terraform Plan
       id: plan
+      if: github.event_name == 'pull_request'
       run: terraform plan -no-color -input=false
       working-directory: environments/dev
+      continue-on-error: true
 
     # 6. Post Plan to PR (only on PRs)
     - name: Update Pull Request
       uses: actions/github-script@v7
       if: github.event_name == 'pull_request'
+      env:
+        PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-          #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-          #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+          const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
+          #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
+          #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
+          #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
+
           <details><summary>Show Plan</summary>
-          \`\`\`\n
-          ${process.env.PLAN}
-          \`\`\`
+
+          \`\`\`${process.env.PLAN}\`\`\`
+
           </details>
+
           *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -93,12 +112,16 @@ jobs:
             body: output
           })
 
+    - name: Terraform Plan Status
+      if: steps.plan.outcome == 'failure'
+      run: exit 1
+
   terraform-cd:
     name: 'Terraform Deployment'
     needs: terraform-ci
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: production # Requires manual approval if configured in GitHub
+    environment: production # Highly Recommended: Set up manual approval in GitHub Settings -> Environments
     
     env:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
