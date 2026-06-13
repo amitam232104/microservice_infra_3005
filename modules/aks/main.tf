@@ -1,3 +1,13 @@
+terraform {
+  required_version = "~> 1.7.0"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.0"
+    }
+  }
+}
+
 resource "azurerm_kubernetes_cluster" "this" {
   name                = var.aks_name
   resource_group_name = var.resource_group_name

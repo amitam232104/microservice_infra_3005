@@ -2,7 +2,7 @@ terraform {
   backend "azurerm" {
     # Replace these with your actual Azure Storage Account details
     resource_group_name  = "rg-terraform-state"
-    storage_account_name = "stterraformstateprod" # Must be globally unique
+    storage_account_name = "sttfstate1400560" # Must be globally unique
     container_name       = "tfstate"
     key                  = "dev.terraform.tfstate"
     
