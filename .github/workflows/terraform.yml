@@ -1,4 +1,4 @@
-name: 'Terraform Production Pipeline' # Triggered after Azure OIDC fix
+name: 'Terraform Production Pipeline' # Triggered after Azure Federated Credential refresh
 
 on:
   push:
