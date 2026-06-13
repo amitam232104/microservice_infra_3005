@@ -28,9 +28,9 @@ variable "admin_enabled" {
 variable "georeplications" {
   description = "List of georeplication configurations"
   type = list(object({
-    location                  = string
-    zone_redundancy_enabled   = bool
-    tags                      = map(string)
+    location                = string
+    zone_redundancy_enabled = bool
+    tags                    = map(string)
   }))
   default = []
 }

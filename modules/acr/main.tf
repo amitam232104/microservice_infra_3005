@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 1.7.0"
+  required_version = ">= 1.7.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -19,9 +19,9 @@ resource "azurerm_container_registry" "this" {
   dynamic "georeplications" {
     for_each = var.sku == "Premium" ? var.georeplications : []
     content {
-      location                  = georeplications.value.location
-      zone_redundancy_enabled   = georeplications.value.zone_redundancy_enabled
-      tags                      = georeplications.value.tags
+      location                = georeplications.value.location
+      zone_redundancy_enabled = georeplications.value.zone_redundancy_enabled
+      tags                    = georeplications.value.tags
     }
   }
 }

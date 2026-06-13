@@ -5,7 +5,7 @@ terraform {
     storage_account_name = "sttfstate1400560" # Must be globally unique
     container_name       = "tfstate"
     key                  = "dev.terraform.tfstate"
-    
+
     # Enables OIDC authentication for the backend
     use_oidc = true
   }

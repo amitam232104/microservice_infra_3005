@@ -45,7 +45,7 @@ module "acrs" {
   sku                 = each.value.acr_data.sku
   admin_enabled       = each.value.acr_data.admin_enabled
   georeplications     = each.value.acr_data.georeplications
-  tags                = module.resource_groups[each.value.rg_key].location != null ? {} : {}
+  tags                = var.infrastructure[each.value.rg_key].tags
 }
 
 # 3. Create AKS Clusters
@@ -60,4 +60,5 @@ module "aks_clusters" {
   dns_prefix          = each.value.aks_data.dns_prefix
   default_node_pool   = each.value.aks_data.default_node_pool
   network_profile     = each.value.aks_data.network_profile
+  tags                = var.infrastructure[each.value.rg_key].tags
 }

@@ -7,9 +7,9 @@ variable "infrastructure" {
       sku           = optional(string, "Standard")
       admin_enabled = optional(bool, false)
       georeplications = optional(list(object({
-        location                  = string
-        zone_redundancy_enabled   = bool
-        tags                      = map(string)
+        location                = string
+        zone_redundancy_enabled = bool
+        tags                    = map(string)
       })), [])
     })), {})
     aks_clusters = optional(map(object({
