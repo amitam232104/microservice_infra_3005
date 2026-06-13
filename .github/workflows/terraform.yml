@@ -1,4 +1,4 @@
-name: 'Terraform Production Pipeline'
+name: 'Terraform Production Pipeline' # Triggered after Azure OIDC fix
 
 on:
   push:
