@@ -20,7 +20,8 @@ infrastructure = {
           vm_size    = "Standard_D2s_v3"
         }
         network_profile = {
-          network_plugin    = "kubenet"
+          network_plugin    = "azure"
+          network_policy    = "azure"
           load_balancer_sku = "standard"
         }
       }
